@@ -1,0 +1,37 @@
+#include <Alfredo_NoU2.h>
+#include <AlfredoConnect.h>
+#include <BluetoothSerial.h>
+
+NoU_Motor LeftDrive(2);
+NoU_Motor RightDrive(1);
+
+NoU_Drivetrain drivetrain(&LeftDrive, &RightDrive);
+BluetoothSerial bluetooth;
+
+
+void setup() {
+  //Setup Code
+  bluetooth.begin("JOSH BANG");
+  AlfredoConnect.begin(bluetooth);
+  bluetooth.println("Starting motor and servo test program.");
+  RSL::initialize();
+  RSL::setState(RSL_ENABLED);
+
+}
+
+void loop() {
+  //Joystick Drive
+  if (AlfredoConnect.getGamepadCount() >= 1) {
+    float throttle = -AlfredoConnect.getAxis(0, 1);
+    float rotation = -AlfredoConnect.getAxis(0, 2);
+
+    drivetrain.arcadeDrive(rotation, throttle); //lets robot drive
+
+    RSL::setState(RSL_ENABLED);
+  } else {
+    RSL::setState(RSL_DISABLED);
+  }
+
+  AlfredoConnect.update();
+  RSL::update();
+}
