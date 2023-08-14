@@ -1,0 +1,67 @@
+#include <Alfredo_NoU2.h>
+#include <AlfredoConnect.h>
+#include <BluetoothSerial.h>
+
+NoU_Motor frontLeft(3);
+NoU_Motor frontRight(6);
+NoU_Motor backLeft(4);
+NoU_Motor backRight(5);
+NoU_Drivetrain drivetrain(&frontLeft, &frontRight, &backLeft, &backRight);
+BluetoothSerial bluetooth;
+
+
+void setup() {
+
+  //input curves (SUPER USEFUL)
+
+  //minimum starting motor percentage
+  //no point in starting at less than 15% in this case because any percentage less won't move the robot
+  drivetrain.setMinimumOutput(0.15);
+
+  //minimum deadband for controller to move any motors
+  //you can see these values within the alfredo software
+  drivetrain.setInputDeadband(0.15);
+
+  //essentially the sensitivity of the controller
+  //the small the number the more sensitive the controller becomes
+  drivetrain.setInputExponent(2);
+
+  //Max starting motor percentage
+  //e.g 0.7 is 70% of the max motor speed
+  drivetrain.setMaximumOutput(.7);
+
+  //setup
+  bluetooth.begin("nogyroxdrive");
+  AlfredoConnect.begin(bluetooth);
+  bluetooth.println("Starting motor and servo test program.");
+  RSL::initialize();
+  RSL::setState(RSL_ENABLED);
+}
+
+void loop() {
+//Arcade Drive
+  if (AlfredoConnect.getGamepadCount() >= 1) {
+    float throttle = AlfredoConnect.getAxis(0, 2);
+    float rotation = AlfredoConnect.getAxis(0, 1);
+    drivetrain.arcadeDrive(throttle, rotation); //lets robot drive
+    RSL::setState(RSL_ENABLED);
+  } else {
+    RSL::setState(RSL_DISABLED);
+  }
+
+//speed settings
+  if (AlfredoConnect.buttonHeld(0,15)) {
+    drivetrain.setMaximumOutput(.7);
+  }
+  if (AlfredoConnect.buttonHeld(0,13)) {
+    drivetrain.setMaximumOutput(.8);
+  }
+  if (AlfredoConnect.buttonHeld(0,14)) {
+    drivetrain.setMaximumOutput(.9);
+  }
+  if (AlfredoConnect.buttonHeld(0,11)) {
+    drivetrain.setMaximumOutput(1);
+  }
+  AlfredoConnect.update();
+  RSL::update();
+}
