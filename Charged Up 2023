@@ -17,6 +17,26 @@ BluetoothSerial bluetooth;
 
 
 void setup() {
+  //input curves (SUPER USEFUL)
+
+  //minimum starting motor percentage
+  //no point in starting at less than 15% in this case because any percentage less won't move the robot
+  drivetrain.setMinimumOutput(0.15);
+
+  //minimum deadband for controller to move any motors
+  //you can see these values within the alfredo software
+  drivetrain.setInputDeadband(0.15);
+
+  //essentially the sensitivity of the controller
+  //the small the number the more sensitive the controller becomes
+  drivetrain.setInputExponent(2);
+
+  //Max starting motor percentage
+  //e.g 0.7 is 70% of the max motor speed
+  drivetrain.setMaximumOutput(.7);
+
+
+
   //Setup Code
   bluetooth.begin("ROBOT");
   AlfredoConnect.begin(bluetooth);
@@ -49,10 +69,8 @@ void loop() {
     elbow.write(15);
     drivetrain.arcadeDrive(1,0);
     shoulder.write(-10);
-    octopusSpin.set(1);
     delay (750);
     drivetrain.arcadeDrive (0, 0);
-    octopusSpin.set(0);
     leftDrive.setInverted(false);
   }
 //Joystick Drive
@@ -68,21 +86,27 @@ void loop() {
 
 //stable
   if (AlfredoConnect.buttonHeld(0,9)) {
-    stable.set(1);
-    delay (50);
+    stable.set(.8);
+    delay (10);
     stable.set(0);
   }
 
   if (AlfredoConnect.buttonHeld(0,8)) {
-    stable.set(-1);
-    delay (50);
+    stable.set(-0.8);
+    delay (10);
     stable.set(0);
+  }
+
+//Morestow
+  if (AlfredoConnect.buttonHeld(0,9)) {
+    shoulder.write(-15);
+    elbow.write(0);
   }
 
 //Stow
   if (AlfredoConnect.buttonHeld(0,0)) {
-    stable.set(1);
-    delay (50);
+    stable.set(0.8);
+    delay (20);
     stable.set(0);
     shoulder.write(-10);
     elbow.write(15); 
@@ -97,8 +121,8 @@ void loop() {
 
   //substation pickup
   if (AlfredoConnect.buttonHeld(0,4)) {
-    stable.set(-1);
-    delay (80);
+    stable.set(-0.8);
+    delay (50);
     stable.set(0);
     elbow.write(81);
     shoulder.write(30);
@@ -106,7 +130,7 @@ void loop() {
 
   // Mid
   if (AlfredoConnect.buttonHeld(0,1)) {
-    stable.set(-1);
+    stable.set(-0.8);
     delay (80);
     stable.set(0);
     elbow.write(93);
@@ -116,7 +140,7 @@ void loop() {
 
   // High
   if (AlfredoConnect.buttonHeld(0,3)) {
-    stable.set(-1);
+    stable.set(-0.8);
     delay (80);
     stable.set(0);
     elbow.write(135);
@@ -139,6 +163,22 @@ void loop() {
     wrist.write (0);
   }
 
+
+//speed settings
+  if (AlfredoConnect.buttonHeld(0,15)) {
+    drivetrain.setMaximumOutput(.7);
+  }
+  if (AlfredoConnect.buttonHeld(0,13)) {
+    drivetrain.setMaximumOutput(.8);
+  }
+  if (AlfredoConnect.buttonHeld(0,14)) {
+    drivetrain.setMaximumOutput(.9);
+  }
+  if (AlfredoConnect.buttonHeld(0,11)) {
+    drivetrain.setMaximumOutput(1);
+  }
+
+  
   AlfredoConnect.update();
   RSL::update();
 }
